@@ -6,6 +6,14 @@ import config from '../config/config';
 
 const ChatContext = createContext();
 
+const isDebugEnabled = import.meta.env.VITE_CHAT_DEBUG === 'true' || localStorage.getItem('chatDebug') === 'true';
+
+const debugLog = (...args) => {
+  if (isDebugEnabled) {
+    console.log('[Chat Debug]:', ...args);
+  }
+};
+
 export const ChatProvider = ({ children }) => {
   const { user } = useAuth();
   const [socket, setSocket] = useState(null);
@@ -29,7 +37,20 @@ export const ChatProvider = ({ children }) => {
 
     const newSocket = io(config.apiUrl, {
       auth: { token },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      secure: true,
+      rejectUnauthorized: false,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
+    });
+
+    debugLog('Attempting to connect to:', config.apiUrl);
+    debugLog('Socket configuration:', {
+      auth: { token: token ? 'present' : 'missing' },
+      transports: ['websocket', 'polling'],
+      secure: true
     });
 
     setSocket(newSocket);
@@ -37,12 +58,33 @@ export const ChatProvider = ({ children }) => {
     newSocket.on('connect', () => {
       setIsConnected(true);
       setError(null);
-      console.log('Connected to chat server');
+      debugLog('Connected to chat server');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      setIsConnected(false);
+      setError(`Connection failed: ${error.message}`);
+      debugLog('Socket connection error:', error);
     });
 
     newSocket.on('disconnect', (reason) => {
       setIsConnected(false);
-      console.log('Disconnected from chat server:', reason);
+      debugLog('Disconnected from chat server:', reason);
+      if (reason === 'io server disconnect') {
+        // Server disconnected, reconnect manually
+        newSocket.connect();
+      }
+    });
+
+    newSocket.on('reconnect', (attemptNumber) => {
+      setIsConnected(true);
+      setError(null);
+      debugLog('Reconnected to chat server after', attemptNumber, 'attempts');
+    });
+
+    newSocket.on('reconnect_error', (error) => {
+      debugLog('Reconnection failed:', error);
+      setError(`Reconnection failed: ${error.message}`);
     });
 
     newSocket.on('user_joined', (data) => {

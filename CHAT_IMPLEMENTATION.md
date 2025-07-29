@@ -144,11 +144,11 @@ The chat system integrates with the backend through:
 3. Access the chat at `/chat` route
 
 ### Configuration
-- Backend URL: `http://localhost:3001` (configurable in `src/config/config.js`)
+- Backend URL: `http://:3001` (configurable in `src/config/config.js`)
 - Socket.IO transports: WebSocket and polling
 - JWT token authentication required
 
-## Usage
+## Usagelocalhost
 
 ### For Admins
 1. Navigate to the "Live Chat" section in the sidebar

@@ -21,7 +21,9 @@ import Chat from "./pages/Chat";
 import ManualWithdrawalsPage from "./pages/ManualWithdrawals";
 import MobileBanking from "./pages/MobileBanking";
 
+
 const App = () => {
+  console.log(import.meta.env.VITE_BACKEND);
   return (
     <Router>
       <AuthProvider>

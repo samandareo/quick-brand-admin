@@ -1,5 +1,5 @@
 const config = {
-  apiUrl: import.meta.env.VITE_BACKEND || "http://31.220.51.218:3001",
+  apiUrl: import.meta.env.VITE_BACKEND || "https://adminquickbondplush.aspshopping.com",
 };
 
 export default config;
