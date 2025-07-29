@@ -35,15 +35,20 @@ export const ChatProvider = ({ children }) => {
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    const newSocket = io(config.apiUrl, {
+    const newSocket = io("https://adminquickbondplush.aspshopping.com/api", {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // Try polling first, then websocket
       secure: true,
       rejectUnauthorized: false,
       forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000,
+      timeout: 20000,
+      // Additional options for better connection handling
+      upgrade: true,
+      rememberUpgrade: true,
+      withCredentials: true
     });
 
     debugLog('Attempting to connect to:', config.apiUrl);
