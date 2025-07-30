@@ -30,25 +30,20 @@ export const ChatProvider = ({ children }) => {
   const typingTimeouts = useRef(new Map());
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return;  
 
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    const newSocket = io("https://adminquickbondplush.aspshopping.com/api", {
+    const newSocket = io(config.socketUrl, {
       auth: { token },
-      transports: ['polling', 'websocket'], // Try polling first, then websocket
+      transports: ['websocket', 'polling'],
       secure: true,
       rejectUnauthorized: false,
       forceNew: true,
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
-      timeout: 20000,
-      // Additional options for better connection handling
-      upgrade: true,
-      rememberUpgrade: true,
-      withCredentials: true
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
 
     debugLog('Attempting to connect to:', config.apiUrl);
