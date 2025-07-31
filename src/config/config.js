@@ -1,6 +1,6 @@
 const config = {
-  apiUrl: "http://api.aspshopping.com",
-  socketUrl: "http://api.aspshopping.com",
+  apiUrl: "https://api.aspshopping.com",
+  socketUrl: "https://api.aspshopping.com",
 };
 
 export default config;
