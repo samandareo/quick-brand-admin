@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { getAllChatUsers } from '../../apis';
-import { SearchIcon, UserCircleIcon } from '@heroicons/react/outline';
+import { SearchIcon, UserCircleIcon } from '../icons';
 
 const ChatUserList = ({ 
   conversations, 

@@ -20,6 +20,12 @@ import NotificationsPage from "./pages/NotificationsPage";
 import Chat from "./pages/Chat";
 import ManualWithdrawalsPage from "./pages/ManualWithdrawals";
 import MobileBanking from "./pages/MobileBanking";
+import Ecommerce from "./pages/Ecommerce";
+import Categories from "./pages/ecommerce/Categories";
+import Banners from "./pages/ecommerce/Banners";
+import Products from "./pages/ecommerce/Products";
+import ProductVariants from "./pages/ecommerce/ProductVariants";
+import Orders from "./pages/ecommerce/Orders";
 
 
 const App = () => {
@@ -59,6 +65,14 @@ const App = () => {
                 <Route path="manual-withdrawals" element={<ManualWithdrawalsPage />} />
                 <Route path="mobile-banking" element={<MobileBanking />} />
                 <Route path="push-notifications" element={<NotificationsPage />} />
+                
+                {/* Ecommerce Routes */}
+                <Route path="ecommerce" element={<Ecommerce />} />
+                <Route path="ecommerce/categories" element={<Categories />} />
+                <Route path="ecommerce/banners" element={<Banners />} />
+                <Route path="ecommerce/products" element={<Products />} />
+                <Route path="ecommerce/products/:productId/variants" element={<ProductVariants />} />
+                <Route path="ecommerce/orders" element={<Orders />} />
               </Route>
             </Routes>
           </ChatProvider>

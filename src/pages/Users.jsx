@@ -8,7 +8,7 @@ import Alert from "../components/ui/Alert";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import { EyeIcon, TrashIcon } from "../components/icons";
 import { DeleteUserById, getUsers, getUserTransactions } from "../apis";
-import { PencilAltIcon } from "@heroicons/react/outline";
+import { PencilSquareIcon } from "../components/icons";
 import { useNavigate } from "react-router-dom";
 
 const Users = () => {
@@ -186,7 +186,7 @@ const Users = () => {
                   className="text-yellow-600 hover:text-yellow-900 mr-3"
                   title="View Transactions"
                 >
-                  <PencilAltIcon className="h-5 w-5" />
+                  <PencilSquareIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => deleteUser(user._id)}

@@ -1,4 +1,4 @@
-import { XIcon } from "@heroicons/react/solid";
+import { XMarkIcon } from "../icons";
 
 const Alert = ({ children, variant = "info", onClose, className = "" }) => {
   const variants = {
@@ -29,7 +29,7 @@ const Alert = ({ children, variant = "info", onClose, className = "" }) => {
                   : "hover:bg-red-100"
               }`}
             >
-              <XIcon className="h-5 w-5" />
+              <XMarkIcon className="h-5 w-5" />
             </button>
           </div>
         )}

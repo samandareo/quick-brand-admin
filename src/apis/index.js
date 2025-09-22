@@ -5,6 +5,16 @@ const http = axios.create({
   baseURL: config.apiUrl,
 });
 
+const httpEcommerce = axios.create({
+  baseURL: config.apiUrlEcommerce,
+});
+
+httpEcommerce.interceptors.request.use((config) => {
+  config.headers["Authorization"] = localStorage.getItem("authToken");
+  return config;
+});
+
+
 http.interceptors.request.use((config) => {
   config.headers["Authorization"] = localStorage.getItem("authToken");
   return config;
@@ -200,3 +210,149 @@ export const getRewardInfo = (params, headers) =>
   http.get("/api/v1/admins/reward-info", { params, headers });
 export const updateRewardInfo = (data, params, headers) =>
   http.put("/api/v1/admins/reward-info", data, { params, headers });
+
+// ECOMMERCE APIs
+
+// Categories APIs
+export const createCategory = (data, params, headers) =>
+  httpEcommerce.post("/api/v1/categories", data, { params, headers });
+export const getCategories = (params, headers) =>
+  httpEcommerce.get("/api/v1/categories", { params, headers });
+export const getCategoryById = (categoryId, params, headers) =>
+  httpEcommerce.get(`/api/v1/categories/${categoryId}`, { params, headers });
+export const updateCategory = (categoryId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/categories/${categoryId}`, data, { params, headers });
+export const deleteCategory = (categoryId, params, headers) =>
+  httpEcommerce.delete(`/api/v1/categories/${categoryId}`, { params, headers });
+export const toggleCategoryStatus = (categoryId, params, headers) =>
+  httpEcommerce.patch(`/api/v1/categories/${categoryId}/toggle-status`, {}, { params, headers });
+
+// Products APIs
+export const createProduct = (data, params, headers) =>
+  httpEcommerce.post("/api/v1/products", data, { params, headers });
+export const getProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products", { params, headers });
+export const getProductById = (productId, params, headers) =>
+  httpEcommerce.get(`/api/v1/products/${productId}`, { params, headers });
+export const updateProduct = (productId, data, params, headers) =>
+  httpEcommerce.put(`/api/v1/products/${productId}`, data, { params, headers });
+export const deleteProduct = (productId, params, headers) =>
+  httpEcommerce.delete(`/api/v1/products/${productId}`, { params, headers });
+export const toggleProductStatus = (productId, params, headers) =>
+  httpEcommerce.patch(`/api/v1/products/${productId}/toggle-status`, {}, { params, headers });
+export const setFlashSale = (productId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/products/${productId}/flash-sale`, data, { params, headers });
+export const deactivateFlashSale = (productId, params, headers) =>
+  httpEcommerce.patch(`/api/v1/products/${productId}/flash-sale/deactivate`, {}, { params, headers });
+export const updateProductInventory = (productId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/products/${productId}/inventory`, data, { params, headers });
+export const getProductStats = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/stats", { params, headers });
+export const getFlashSaleProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/flash-sale", { params, headers });
+export const getTopRatedProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/top-rated", { params, headers });
+export const getProductsInStock = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/in-stock", { params, headers });
+export const getOutOfStockProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/out-of-stock", { params, headers });
+export const getLowStockProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/low-stock", { params, headers });
+export const getAllBrands = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/brands", { params, headers });
+export const getAllTags = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/tags", { params, headers });
+export const uploadProductImages = (formData, params, headers) =>
+  httpEcommerce.post("/api/v1/products/upload-images", formData, { 
+    params, 
+    headers: { 
+      ...headers, 
+      'Content-Type': 'multipart/form-data' 
+    } 
+  });
+export const updateProductData = (productId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/products/${productId}`, data, { params, headers });
+
+// Variants APIs
+export const createVariant = (productId, data, params, headers) =>
+  httpEcommerce.post(`/api/v1/variants/${productId}`, data, { 
+    params, 
+    headers: { 
+      ...headers, 
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+    } 
+  });
+export const getVariants = (params, headers) =>
+  httpEcommerce.get("/api/v1/variants", { params, headers });
+export const getVariantById = (variantId, params, headers) =>
+  httpEcommerce.get(`/api/v1/variants/single/${variantId}`, { params, headers });
+export const updateVariant = (variantId, data, params, headers) =>
+  httpEcommerce.put(`/api/v1/variants/${variantId}`, data, { 
+    params, 
+    headers: { 
+      ...headers, 
+      'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json'
+    } 
+  });
+export const deleteVariant = (variantId, params, headers) =>
+  httpEcommerce.delete(`/api/v1/variants/${variantId}`, { params, headers });
+export const toggleVariantStatus = (variantId, params, headers) =>
+  httpEcommerce.patch(`/api/v1/variants/${variantId}/toggle-status`, {}, { params, headers });
+export const updateVariantInventory = (variantId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/variants/${variantId}/inventory`, data, { params, headers });
+export const addToInventory = (variantId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/variants/${variantId}/add-inventory`, data, { params, headers });
+export const removeFromInventory = (variantId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/variants/${variantId}/remove-inventory`, data, { params, headers });
+export const getVariantsByProduct = (productId, params, headers) =>
+  httpEcommerce.get(`/api/v1/variants/${productId}`, { params, headers });
+export const getVariantsInStock = (productId, params, headers) =>
+  httpEcommerce.get(`/api/v1/variants/${productId}/in-stock`, { params, headers });
+export const getOutOfStockVariants = (productId, params, headers) =>
+  httpEcommerce.get(`/api/v1/variants/${productId}/out-of-stock`, { params, headers });
+
+// Banners APIs
+export const createBanner = (data, params, headers) =>
+  httpEcommerce.post("/api/v1/banners", data, { params, headers });
+export const getBanners = (params, headers) =>
+  httpEcommerce.get("/api/v1/banners", { params, headers });
+export const getBannerById = (bannerId, params, headers) =>
+  httpEcommerce.get(`/api/v1/banners/${bannerId}`, { params, headers });
+export const updateBanner = (bannerId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/banners/${bannerId}`, data, { params, headers });
+export const deleteBanner = (bannerId, params, headers) =>
+  httpEcommerce.delete(`/api/v1/banners/${bannerId}`, { params, headers });
+export const toggleBannerStatus = (bannerId, params, headers) =>
+  httpEcommerce.patch(`/api/v1/banners/${bannerId}/toggle-status`, {}, { params, headers });
+export const uploadBannerImage = (formData, params, headers) =>
+  httpEcommerce.post("/api/v1/banners/upload-image", formData, { 
+    params, 
+    headers: { 
+      ...headers, 
+      'Content-Type': 'multipart/form-data' 
+    } 
+  });
+
+// Orders APIs
+export const getAllOrders = (params, headers) =>
+  httpEcommerce.get("/api/v1/orders/admin/all", { params, headers });
+export const getOrderById = (orderId, params, headers) =>
+  httpEcommerce.get(`/api/v1/orders/admin/${orderId}`, { params, headers });
+export const updateOrderStatus = (orderId, data, params, headers) =>
+  httpEcommerce.patch(`/api/v1/orders/admin/${orderId}/status`, data, { params, headers });
+export const refundDeliveryCost = (orderId, data, params, headers) =>
+  httpEcommerce.post(`/api/v1/orders/admin/${orderId}/refund`, data, { params, headers });
+export const getOrderStats = (params, headers) =>
+  httpEcommerce.get("/api/v1/orders/admin/stats/overview", { params, headers });
+export const getOrdersByStatus = (status, params, headers) =>
+  httpEcommerce.get(`/api/v1/orders/admin/status/${status}`, { params, headers });
+export const bulkUpdateOrderStatus = (data, params, headers) =>
+  httpEcommerce.patch("/api/v1/orders/admin/bulk-update", data, { params, headers });
+
+// Ecommerce Dashboard APIs
+export const getEcommerceStats = (params, headers) =>
+  httpEcommerce.get("/api/v1/admins/ecommerce/stats", { params, headers });
+export const getBestSellingProducts = (params, headers) =>
+  httpEcommerce.get("/api/v1/products/mobile/top-selling", { params, headers });
+export const getDailySales = (params, headers) =>
+  httpEcommerce.get("/api/v1/orders/admin/daily-sales", { params, headers });

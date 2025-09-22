@@ -7,8 +7,8 @@ import {
   UserCircleIcon,
   CheckIcon,
   CheckCircleIcon,
-  RefreshIcon
-} from '@heroicons/react/outline';
+  ArrowPathIcon
+} from '../icons';
 
 const ChatConversation = ({ conversation, loading }) => {
   const {
@@ -305,7 +305,7 @@ const ChatConversation = ({ conversation, loading }) => {
             className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 transition-colors duration-150"
             title="Refresh messages"
           >
-            <RefreshIcon className={`h-5 w-5 ${localLoading ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`h-5 w-5 ${localLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>

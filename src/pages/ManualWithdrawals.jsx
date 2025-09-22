@@ -8,7 +8,7 @@ import Input from "../components/ui/Input";
 import Alert from "../components/ui/Alert";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import StatusBadge from "../components/ui/StatusBadge";
-import { EyeIcon, CheckIcon, XIcon } from "../components/icons";
+import { EyeIcon, CheckIcon, XMarkIcon } from "../components/icons";
 import { 
   getManualWithdrawals, 
   getManualWithdrawalById, 
@@ -451,7 +451,7 @@ const ManualWithdrawals = () => {
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <XIcon className="h-5 w-5 text-yellow-400" />
+                  <XMarkIcon className="h-5 w-5 text-yellow-400" />
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-yellow-800">

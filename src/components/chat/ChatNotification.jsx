@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useChat } from '../../context/ChatContext';
-import { ChatAltIcon } from '@heroicons/react/outline';
+import { ChatAltIcon } from '../icons';
 
 const ChatNotification = () => {
   const { getTotalUnreadCount, isConnected } = useChat();

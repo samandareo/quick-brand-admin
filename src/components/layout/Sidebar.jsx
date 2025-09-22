@@ -12,9 +12,10 @@ import {
   BellIcon,
   ChatAltIcon,
   DocumentTextIcon,
+  ShoppingCartIcon,
 } from "../icons";
 import { useAuth } from "../../context/AuthContext";
-import { ArrowLeftIcon } from "@heroicons/react/outline";
+import { ArrowLeftIcon } from "../icons";
 import { useNotifications } from "../../context/useNotifications";
 import { useChat } from "../../context/ChatContext";
 
@@ -26,6 +27,7 @@ const Sidebar = () => {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: HomeIcon },
+    { name: "Ecommerce", href: "/ecommerce", icon: ShoppingCartIcon },
     { name: "Users", href: "/users", icon: UsersIcon },
     { name: "Transactions", href: "/transactions", icon: CreditCardIcon },
     { name: "Operators", href: "/operators", icon: SpeakerphoneIcon },

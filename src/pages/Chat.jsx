@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
 import ChatUserList from '../components/chat/ChatUserList';
 import ChatConversation from '../components/chat/ChatConversation';
-import { ChatAltIcon } from '@heroicons/react/outline';
+import { ChatAltIcon } from '../components/icons';
 
 const Chat = () => {
   const { 

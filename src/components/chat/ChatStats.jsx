@@ -5,7 +5,7 @@ import {
   UserGroupIcon, 
   ClockIcon, 
   CheckCircleIcon 
-} from '@heroicons/react/outline';
+} from '../icons';
 
 const ChatStats = () => {
   const [stats, setStats] = useState(null);

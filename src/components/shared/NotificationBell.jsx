@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNotifications } from "../../context/useNotifications"; // 👈 import hook
-import { BellIcon } from "@heroicons/react/outline";
+import { BellIcon } from "../icons";
 import { Link } from "react-router-dom";
 
 const NotificationBell = () => {
