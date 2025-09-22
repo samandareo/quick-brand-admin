@@ -1,7 +1,9 @@
 const config = {
-  apiUrl: "http://localhost:3001",
+  apiUrl: "https://api.aspshopping.com",
   socketUrl: "https://api.aspshopping.com",
-  apiUrlEcommerce: "http://localhost:8001",
+  apiUrlEcommerce: "https://ecommerce.aspshopping.com",
 };
+
+// just links
 
 export default config;
