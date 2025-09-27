@@ -19,6 +19,8 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusUpdateData, setStatusUpdateData] = useState({ orderId: '', currentStatus: '', newStatus: '', reason: '', notes: '' });
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [sortBy, setSortBy] = useState('createdAt');
@@ -63,6 +65,9 @@ const Orders = () => {
           pendingOrders: statsData.pendingOrders || 0,
           confirmedOrders: statsData.confirmedOrders || 0,
           cancelledOrders: statsData.cancelledOrders || 0,
+          shippingOrders: statsData.shippingOrders || 0,
+          deliveringOrders: statsData.deliveringOrders || 0,
+          deliveredOrders: statsData.deliveredOrders || 0,
           totalOrders: statsData.totalOrders || 0
         });
       } else {
@@ -71,6 +76,9 @@ const Orders = () => {
           pendingOrders: 0,
           confirmedOrders: 0,
           cancelledOrders: 0,
+          shippingOrders: 0,
+          deliveringOrders: 0,
+          deliveredOrders: 0,
           totalOrders: 0
         });
       }
@@ -83,13 +91,39 @@ const Orders = () => {
     }
   };
 
-  const handleStatusUpdate = async (orderId, status) => {
+  const handleStatusUpdate = async (orderId, status, reason = '', notes = '') => {
     try {
-      await updateOrderStatus(orderId, { status, reason: `Status updated to ${status}` });
+      await updateOrderStatus(orderId, { status, reason: reason || `Status updated to ${status}`, notes });
       fetchData();
+      setShowStatusModal(false);
+      setStatusUpdateData({ orderId: '', currentStatus: '', newStatus: '', reason: '', notes: '' });
     } catch (error) {
       console.error('Error updating order status:', error);
+      alert('Failed to update order status: ' + (error.response?.data?.message || error.message));
     }
+  };
+
+  const handleOpenStatusModal = (order, newStatus) => {
+    setStatusUpdateData({
+      orderId: order._id,
+      currentStatus: order.status,
+      newStatus: newStatus,
+      reason: '',
+      notes: ''
+    });
+    setShowStatusModal(true);
+  };
+
+  const getValidStatusTransitions = (currentStatus) => {
+    const validTransitions = {
+      'pending': ['confirmed', 'cancelled'],
+      'confirmed': ['shipping', 'cancelled'],
+      'shipping': ['delivering', 'cancelled'],
+      'delivering': ['delivered', 'cancelled'],
+      'delivered': [],
+      'cancelled': []
+    };
+    return validTransitions[currentStatus] || [];
   };
 
   const handleRefund = async (orderId) => {
@@ -129,6 +163,9 @@ const Orders = () => {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'shipping': return 'bg-purple-100 text-purple-800';
+      case 'delivering': return 'bg-orange-100 text-orange-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -141,6 +178,28 @@ const Orders = () => {
     return order.deliveryCostRefunded;
   };
 
+  const getStatusActionColor = (status) => {
+    switch (status) {
+      case 'confirmed': return 'text-green-600 hover:text-green-900';
+      case 'cancelled': return 'text-red-600 hover:text-red-900';
+      case 'shipping': return 'text-purple-600 hover:text-purple-900';
+      case 'delivering': return 'text-orange-600 hover:text-orange-900';
+      case 'delivered': return 'text-emerald-600 hover:text-emerald-900';
+      default: return 'text-gray-600 hover:text-gray-900';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'confirmed': return <CheckIcon className="h-4 w-4" />;
+      case 'cancelled': return <XMarkIcon className="h-4 w-4" />;
+      case 'shipping': return <span className="text-xs font-bold">📦</span>;
+      case 'delivering': return <span className="text-xs font-bold">🚚</span>;
+      case 'delivered': return <span className="text-xs font-bold">✅</span>;
+      default: return <span className="text-xs font-bold">?</span>;
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -149,48 +208,70 @@ const Orders = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-500">
-              <ArrowPathIcon className="h-6 w-6 text-white" />
+            <div className="p-2 rounded-full bg-yellow-500">
+              <span className="text-white text-sm font-bold">⏳</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.pendingOrders || 0}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Pending</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.pendingOrders || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-500">
-              <CheckIcon className="h-6 w-6 text-white" />
+            <div className="p-2 rounded-full bg-blue-500">
+              <CheckIcon className="h-4 w-4 text-white" />
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Confirmed</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.confirmedOrders || 0}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Confirmed</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.confirmedOrders || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-red-500">
-              <XMarkIcon className="h-6 w-6 text-white" />
+            <div className="p-2 rounded-full bg-purple-500">
+              <span className="text-white text-sm font-bold">📦</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Cancelled</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.cancelledOrders || 0}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Shipping</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.shippingOrders || 0}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-gray-500">
-              <ArrowPathIcon className="h-6 w-6 text-white" />
+            <div className="p-2 rounded-full bg-orange-500">
+              <span className="text-white text-sm font-bold">🚚</span>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalOrders || 0}</p>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Delivering</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.deliveringOrders || 0}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <div className="p-2 rounded-full bg-green-500">
+              <span className="text-white text-sm font-bold">✅</span>
+            </div>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Delivered</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.deliveredOrders || 0}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center">
+            <div className="p-2 rounded-full bg-red-500">
+              <XMarkIcon className="h-4 w-4 text-white" />
+            </div>
+            <div className="ml-3">
+              <p className="text-xs font-medium text-gray-600">Cancelled</p>
+              <p className="text-lg font-semibold text-gray-900">{stats.cancelledOrders || 0}</p>
             </div>
           </div>
         </div>
@@ -223,6 +304,9 @@ const Orders = () => {
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
+              <option value="shipping">Shipping</option>
+              <option value="delivering">Delivering</option>
+              <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
@@ -322,24 +406,19 @@ const Orders = () => {
                         >
                           <EyeIcon className="h-4 w-4" />
                         </button>
-                        {order.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleStatusUpdate(order._id, 'confirmed')}
-                              className="text-green-600 hover:text-green-900"
-                              title="Confirm Order"
-                            >
-                              <CheckIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleStatusUpdate(order._id, 'cancelled')}
-                              className="text-red-600 hover:text-red-900"
-                              title="Cancel Order"
-                            >
-                              <XMarkIcon className="h-4 w-4" />
-                            </button>
-                          </>
-                        )}
+                        
+                        {/* Status update buttons based on valid transitions */}
+                        {getValidStatusTransitions(order.status).map((validStatus) => (
+                          <button
+                            key={validStatus}
+                            onClick={() => handleOpenStatusModal(order, validStatus)}
+                            className={`${getStatusActionColor(validStatus)} hover:opacity-80`}
+                            title={`Change to ${validStatus}`}
+                          >
+                            {getStatusIcon(validStatus)}
+                          </button>
+                        ))}
+                        
                         {canRefund(order) && (
                           <button
                             onClick={() => handleRefund(order._id)}
@@ -487,6 +566,85 @@ const Orders = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Update Modal */}
+      {showStatusModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Update Order Status
+              </h3>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  Change status from <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(statusUpdateData.currentStatus)}`}>
+                    {statusUpdateData.currentStatus}
+                  </span> to <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(statusUpdateData.newStatus)}`}>
+                    {statusUpdateData.newStatus}
+                  </span>
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason for Update *
+                </label>
+                <input
+                  type="text"
+                  value={statusUpdateData.reason}
+                  onChange={(e) => setStatusUpdateData({...statusUpdateData, reason: e.target.value})}
+                  placeholder="Enter reason for status change"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Notes (Optional)
+                </label>
+                <textarea
+                  value={statusUpdateData.notes}
+                  onChange={(e) => setStatusUpdateData({...statusUpdateData, notes: e.target.value})}
+                  placeholder="Add any additional notes..."
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setStatusUpdateData({ orderId: '', currentStatus: '', newStatus: '', reason: '', notes: '' });
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (!statusUpdateData.reason.trim()) {
+                      alert('Please provide a reason for the status change');
+                      return;
+                    }
+                    handleStatusUpdate(
+                      statusUpdateData.orderId, 
+                      statusUpdateData.newStatus, 
+                      statusUpdateData.reason,
+                      statusUpdateData.notes
+                    );
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Update Status
+                </button>
               </div>
             </div>
           </div>
