@@ -407,17 +407,36 @@ const Orders = () => {
                           <EyeIcon className="h-4 w-4" />
                         </button>
                         
+                        {/* Debug: Show current status and valid transitions */}
+                        {process.env.NODE_ENV === 'development' && (
+                          <div className="text-xs text-gray-500" title={`Status: ${order.status}, Transitions: ${getValidStatusTransitions(order.status).join(', ')}`}>
+                            🐛
+                          </div>
+                        )}
+                        
                         {/* Status update buttons based on valid transitions */}
                         {getValidStatusTransitions(order.status).map((validStatus) => (
                           <button
                             key={validStatus}
-                            onClick={() => handleOpenStatusModal(order, validStatus)}
-                            className={`${getStatusActionColor(validStatus)} hover:opacity-80`}
+                            onClick={() => {
+                              console.log('Status button clicked:', {
+                                orderId: order._id,
+                                currentStatus: order.status,
+                                newStatus: validStatus
+                              });
+                              handleOpenStatusModal(order, validStatus);
+                            }}
+                            className={`${getStatusActionColor(validStatus)} hover:opacity-80 border border-current rounded px-1`}
                             title={`Change to ${validStatus}`}
                           >
                             {getStatusIcon(validStatus)}
                           </button>
                         ))}
+                        
+                        {/* Debug: Show if no buttons available */}
+                        {getValidStatusTransitions(order.status).length === 0 && (
+                          <span className="text-xs text-gray-400 italic">No actions</span>
+                        )}
                         
                         {canRefund(order) && (
                           <button
