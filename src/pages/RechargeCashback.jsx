@@ -85,8 +85,29 @@ const RechargeCashback = () => {
       errors.max = "Maximum amount must be greater than minimum amount";
     }
 
-    // Note: Removed overlap validation to allow flexible cashback rules
-    // The API will handle any business logic conflicts
+    // Check for overlapping ranges
+    const min = parseInt(formData.min);
+    const max = parseInt(formData.max);
+    
+    if (!isNaN(min) && !isNaN(max)) {
+      const overlapping = cashbackRules.find(rule => {
+        // Skip current rule if editing
+        if (editingRule && rule.min === editingRule.min && rule.max === editingRule.max) {
+          return false;
+        }
+        
+        // Check for any overlap between ranges
+        return (
+          (min >= rule.min && min <= rule.max) ||  // New min falls within existing range
+          (max >= rule.min && max <= rule.max) ||  // New max falls within existing range
+          (min <= rule.min && max >= rule.max)     // New range completely contains existing range
+        );
+      });
+      
+      if (overlapping) {
+        errors.range = `Range conflicts with existing rule: ৳${overlapping.min} - ৳${overlapping.max} (${overlapping.percent}% cashback). Please choose non-overlapping amounts.`;
+      }
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -202,8 +223,56 @@ const RechargeCashback = () => {
 
   const formatPercentage = (percent) => `${percent}%`;
 
+  // Helper function to get suggested ranges
+  const getSuggestedRanges = () => {
+    if (cashbackRules.length === 0) {
+      return [
+        { min: 20, max: 100, description: "Low amounts (₹20-₹100)" },
+        { min: 101, max: 500, description: "Medium amounts (₹101-₹500)" },
+        { min: 501, max: 1000, description: "High amounts (₹501-₹1000)" }
+      ];
+    }
+
+    const sortedRules = [...cashbackRules].sort((a, b) => a.min - b.min);
+    const suggestions = [];
+
+    // Check for gap before first rule
+    if (sortedRules[0].min > 1) {
+      suggestions.push({
+        min: 1,
+        max: sortedRules[0].min - 1,
+        description: `Before existing range (₹1-₹${sortedRules[0].min - 1})`
+      });
+    }
+
+    // Check for gaps between rules
+    for (let i = 0; i < sortedRules.length - 1; i++) {
+      const currentMax = sortedRules[i].max;
+      const nextMin = sortedRules[i + 1].min;
+      
+      if (nextMin - currentMax > 1) {
+        suggestions.push({
+          min: currentMax + 1,
+          max: nextMin - 1,
+          description: `Between ₹${currentMax} and ₹${nextMin} (₹${currentMax + 1}-₹${nextMin - 1})`
+        });
+      }
+    }
+
+    // Suggest range after last rule
+    const lastRule = sortedRules[sortedRules.length - 1];
+    suggestions.push({
+      min: lastRule.max + 1,
+      max: lastRule.max + 500,
+      description: `After existing range (₹${lastRule.max + 1}+)`
+    });
+
+    return suggestions.slice(0, 3); // Show only first 3 suggestions
+  };
+
   const headers = [
-    "Amount Range",
+    "Minimum Amount",
+    "Maximum Amount",
     "Cashback Percentage",
     "Actions"
   ];
@@ -212,10 +281,12 @@ const RechargeCashback = () => {
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         <div className="font-semibold text-green-600">
-          {formatCurrency(rule.min)} - {formatCurrency(rule.max)}
+          {formatCurrency(rule.min)}
         </div>
-        <div className="text-xs text-gray-500">
-          Applies to recharges between these amounts
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        <div className="font-semibold text-green-600">
+          {formatCurrency(rule.max)}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -269,10 +340,7 @@ const RechargeCashback = () => {
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Recharge Cashback Management</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Configure cashback percentages for different recharge amount ranges. Multiple overlapping ranges are allowed.
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Example: Range ৳20-৳50 (2%) and ৳100-৳250 (7%) can coexist. Users get the applicable cashback for their recharge amount.
+            Configure cashback percentages for different recharge amount ranges
           </p>
         </div>
         <Button
@@ -337,25 +405,76 @@ const RechargeCashback = () => {
       {error && <Alert variant="danger" onClose={() => setError("")}>{error}</Alert>}
       {success && <Alert variant="success" onClose={() => setSuccess("")}>{success}</Alert>}
 
+      {/* Helper Information */}
+      {cashbackRules.length > 0 && (
+        <Card className="bg-blue-50">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-blue-900 mb-2">📍 Existing Cashback Ranges</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {[...cashbackRules]
+                .sort((a, b) => a.min - b.min)
+                .map((rule, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-white rounded-lg p-3 border border-blue-200"
+                  >
+                    <div className="text-sm font-medium text-gray-900">
+                      {formatCurrency(rule.min)} - {formatCurrency(rule.max)}
+                    </div>
+                    <div className="text-xs text-blue-600">
+                      {formatPercentage(rule.percent)} cashback
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="text-md font-medium text-blue-900 mb-2">💡 Available Ranges (No Conflicts)</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {getSuggestedRanges().map((suggestion, index) => (
+                <div 
+                  key={index} 
+                  className="bg-green-50 rounded-lg p-3 border border-green-200 cursor-pointer hover:bg-green-100 transition-colors"
+                  onClick={() => {
+                    setFormData({
+                      min: suggestion.min.toString(),
+                      max: suggestion.max.toString(),
+                      percent: ""
+                    });
+                    setShowModal(true);
+                  }}
+                  title="Click to use this range"
+                >
+                  <div className="text-sm font-medium text-green-900">
+                    {suggestion.description}
+                  </div>
+                  <div className="text-xs text-green-600">
+                    Click to create rule for this range
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="text-yellow-600 mr-2">⚠️</div>
+              <div className="text-sm text-yellow-800">
+                <strong>Important:</strong> Cashback ranges cannot overlap. For example, if you have a rule for ৳20-৳50, 
+                you cannot create another rule for ৳30-৳60 or ৳40-৳80 as they would conflict. 
+                Choose non-overlapping ranges to avoid conflicts.
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Cashback Rules Table */}
       <Card>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium text-gray-900">Cashback Rules</h2>
         </div>
-
-        {cashbackRules.length > 0 && (
-          <div className="mb-4 p-3 bg-green-50 rounded-md">
-            <h4 className="text-sm font-medium text-green-800 mb-2">How these rules work:</h4>
-            <div className="text-xs text-green-700 space-y-1">
-              {cashbackRules.slice(0, 3).map((rule, index) => (
-                <p key={index}>
-                  • If user recharges ৳{rule.min + Math.floor((rule.max - rule.min) / 2)}, they get {formatPercentage(rule.percent)} cashback = ৳{((rule.min + Math.floor((rule.max - rule.min) / 2)) * rule.percent / 100).toFixed(2)}
-                </p>
-              ))}
-              {cashbackRules.length > 3 && <p>• And more rules...</p>}
-            </div>
-          </div>
-        )}
 
         <Table
           headers={headers}
@@ -368,10 +487,44 @@ const RechargeCashback = () => {
           <div className="text-center py-8 text-gray-500">
             <CurrencyDollarIcon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
             <p className="text-lg font-medium">No cashback rules configured</p>
-            <p className="text-sm">Create cashback rules for different recharge amount ranges</p>
-            <p className="text-xs mt-2 text-gray-400">
-              Example: ৳20-৳50 with 2% cashback, ৳100-৳250 with 7% cashback
-            </p>
+            <p className="text-sm mb-4">Add your first cashback rule to get started</p>
+            
+            {/* Getting Started Guide */}
+            <div className="max-w-2xl mx-auto text-left bg-blue-50 rounded-lg p-6 border border-blue-200">
+              <h3 className="text-lg font-medium text-blue-900 mb-4">🚀 Getting Started with Cashback Rules</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center text-blue-600 text-sm font-medium mr-3 mt-0.5">1</div>
+                  <div>
+                    <h4 className="font-medium text-blue-900">Create Your First Rule</h4>
+                    <p className="text-sm text-blue-700">Start with a simple range like ৳20-৳50 with 2% cashback</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center text-blue-600 text-sm font-medium mr-3 mt-0.5">2</div>
+                  <div>
+                    <h4 className="font-medium text-blue-900">Add More Ranges</h4>
+                    <p className="text-sm text-blue-700">Create additional non-overlapping ranges like ৳51-৳100 with 3% cashback</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="bg-blue-100 rounded-full w-6 h-6 flex items-center justify-center text-blue-600 text-sm font-medium mr-3 mt-0.5">3</div>
+                  <div>
+                    <h4 className="font-medium text-blue-900">How It Works</h4>
+                    <p className="text-sm text-blue-700">When users recharge ৳25, they get ৳0.50 cashback (2%). For ৳75 recharge, they get ৳2.25 cashback (3%)</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                <p className="text-sm text-yellow-800">
+                  <strong>💡 Tip:</strong> Higher recharge amounts usually get higher cashback percentages to encourage larger transactions.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </Card>
@@ -382,20 +535,20 @@ const RechargeCashback = () => {
         onClose={handleCloseModal}
         title={editingRule ? "Edit Cashback Rule" : "Add New Cashback Rule"}
       >
-        <div className="mb-4 p-3 bg-blue-50 rounded-md">
-          <p className="text-sm text-blue-700">
-            <strong>How it works:</strong> When a user recharges within this amount range, they will receive the specified percentage as cashback.
-          </p>
-          <p className="text-xs text-blue-600 mt-1">
-            Multiple ranges can overlap. For example: ৳20-৳50 (2%) and ৳30-৳60 (3%) are both valid.
-          </p>
-        </div>
-        
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Example section */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+            <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Example</h4>
+            <p className="text-sm text-blue-800">
+              If you create a rule: Min ৳100, Max ৳250, Cashback 7% — then when a user recharges ৳150, 
+              they will receive ৳10.50 as cashback (7% of ৳150).
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Minimum Amount (৳)
+                Minimum Amount (৳) <span className="text-red-500">*</span>
               </label>
               <Input
                 type="number"
@@ -404,15 +557,16 @@ const RechargeCashback = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., 100"
                 error={formErrors.min}
-                min="0"
+                min="1"
                 step="1"
                 className="w-full"
               />
+              <p className="text-xs text-gray-500 mt-1">Lowest recharge amount for this cashback</p>
             </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Maximum Amount (৳)
+                Maximum Amount (৳) <span className="text-red-500">*</span>
               </label>
               <Input
                 type="number"
@@ -421,16 +575,17 @@ const RechargeCashback = () => {
                 onChange={handleInputChange}
                 placeholder="e.g., 500"
                 error={formErrors.max}
-                min="0"
+                min="1"
                 step="1"
                 className="w-full"
               />
+              <p className="text-xs text-gray-500 mt-1">Highest recharge amount for this cashback</p>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Cashback Percentage (%)
+              Cashback Percentage (%) <span className="text-red-500">*</span>
             </label>
             <Input
               type="number"
@@ -439,12 +594,40 @@ const RechargeCashback = () => {
               onChange={handleInputChange}
               placeholder="e.g., 5"
               error={formErrors.percent}
-              min="0"
+              min="0.1"
               max="100"
               step="0.1"
               className="w-full"
             />
+            <p className="text-xs text-gray-500 mt-1">Percentage of recharge amount to return as cashback</p>
           </div>
+
+          {/* Range validation error */}
+          {formErrors.range && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-start">
+                <div className="text-red-500 mr-2">❌</div>
+                <div className="text-sm text-red-800">
+                  <strong>Range Conflict:</strong> {formErrors.range}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Preview section */}
+          {formData.min && formData.max && formData.percent && !formErrors.min && !formErrors.max && !formErrors.percent && !formErrors.range && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <h4 className="text-sm font-medium text-green-900 mb-2">✅ Preview</h4>
+              <p className="text-sm text-green-800">
+                Users who recharge between <strong>৳{formData.min} - ৳{formData.max}</strong> will receive{" "}
+                <strong>{formData.percent}% cashback</strong>.
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                Example: ৳{Math.floor((parseInt(formData.min) + parseInt(formData.max)) / 2)} recharge = ৳
+                {((Math.floor((parseInt(formData.min) + parseInt(formData.max)) / 2) * parseFloat(formData.percent)) / 100).toFixed(2)} cashback
+              </p>
+            </div>
+          )}
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button
