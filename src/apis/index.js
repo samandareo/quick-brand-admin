@@ -369,3 +369,13 @@ httpRecharge.interceptors.request.use((config) => {
 
 export const getAllRecharges = (params, headers) =>
   httpRecharge.get("/api/recharge/all", { params, headers });
+
+// Cashback APIs
+export const getAllCashbackRules = (params, headers) =>
+  httpRecharge.get("/api/cashback/", { params, headers });
+export const createCashbackRule = (data, params, headers) =>
+  httpRecharge.post("/api/cashback/", data, { params, headers });
+export const updateCashbackRule = (data, params, headers) =>
+  httpRecharge.put("/api/cashback/", data, { params, headers });
+export const deleteCashbackRule = (data, params, headers) =>
+  httpRecharge.delete("/api/cashback/", { data, params, headers });

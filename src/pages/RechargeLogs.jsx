@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Card from "../components/ui/Card";
 import Table from "../components/ui/Table";
 import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import Alert from "../components/ui/Alert";
 import StatusBadge from "../components/ui/StatusBadge";
-import { MagnifyingGlassIcon, FunnelIcon } from "../components/icons";
+import { MagnifyingGlassIcon, FunnelIcon, CogIcon } from "../components/icons";
 import { getAllRecharges } from "../apis";
 
 const RechargeLogs = () => {
@@ -183,6 +185,12 @@ const RechargeLogs = () => {
             Monitor all recharge requests and their status
           </p>
         </div>
+        <Link to="/recharge-cashback">
+          <Button className="flex items-center space-x-2">
+            <CogIcon className="h-4 w-4" />
+            <span>Manage Cashback</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Stats Cards */}
