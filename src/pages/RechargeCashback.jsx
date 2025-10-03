@@ -85,26 +85,8 @@ const RechargeCashback = () => {
       errors.max = "Maximum amount must be greater than minimum amount";
     }
 
-    // Check for overlapping ranges
-    const min = parseInt(formData.min);
-    const max = parseInt(formData.max);
-    
-    const overlapping = cashbackRules.find(rule => {
-      // Skip current rule if editing
-      if (editingRule && rule.min === editingRule.min && rule.max === editingRule.max) {
-        return false;
-      }
-      
-      return (
-        (min >= rule.min && min <= rule.max) ||
-        (max >= rule.min && max <= rule.max) ||
-        (min <= rule.min && max >= rule.max)
-      );
-    });
-    
-    if (overlapping) {
-      errors.range = `Range overlaps with existing rule: ৳${overlapping.min} - ৳${overlapping.max}`;
-    }
+    // Note: Removed overlap validation to allow flexible cashback rules
+    // The API will handle any business logic conflicts
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -221,8 +203,7 @@ const RechargeCashback = () => {
   const formatPercentage = (percent) => `${percent}%`;
 
   const headers = [
-    "Minimum Amount",
-    "Maximum Amount",
+    "Amount Range",
     "Cashback Percentage",
     "Actions"
   ];
@@ -231,12 +212,10 @@ const RechargeCashback = () => {
     <>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         <div className="font-semibold text-green-600">
-          {formatCurrency(rule.min)}
+          {formatCurrency(rule.min)} - {formatCurrency(rule.max)}
         </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        <div className="font-semibold text-green-600">
-          {formatCurrency(rule.max)}
+        <div className="text-xs text-gray-500">
+          Applies to recharges between these amounts
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -290,7 +269,10 @@ const RechargeCashback = () => {
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Recharge Cashback Management</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Configure cashback percentages for different recharge amount ranges
+            Configure cashback percentages for different recharge amount ranges. Multiple overlapping ranges are allowed.
+          </p>
+          <p className="mt-1 text-xs text-gray-500">
+            Example: Range ৳20-৳50 (2%) and ৳100-৳250 (7%) can coexist. Users get the applicable cashback for their recharge amount.
           </p>
         </div>
         <Button
@@ -361,6 +343,20 @@ const RechargeCashback = () => {
           <h2 className="text-lg font-medium text-gray-900">Cashback Rules</h2>
         </div>
 
+        {cashbackRules.length > 0 && (
+          <div className="mb-4 p-3 bg-green-50 rounded-md">
+            <h4 className="text-sm font-medium text-green-800 mb-2">How these rules work:</h4>
+            <div className="text-xs text-green-700 space-y-1">
+              {cashbackRules.slice(0, 3).map((rule, index) => (
+                <p key={index}>
+                  • If user recharges ৳{rule.min + Math.floor((rule.max - rule.min) / 2)}, they get {formatPercentage(rule.percent)} cashback = ৳{((rule.min + Math.floor((rule.max - rule.min) / 2)) * rule.percent / 100).toFixed(2)}
+                </p>
+              ))}
+              {cashbackRules.length > 3 && <p>• And more rules...</p>}
+            </div>
+          </div>
+        )}
+
         <Table
           headers={headers}
           data={cashbackRules}
@@ -372,7 +368,10 @@ const RechargeCashback = () => {
           <div className="text-center py-8 text-gray-500">
             <CurrencyDollarIcon className="h-12 w-12 mx-auto text-gray-300 mb-4" />
             <p className="text-lg font-medium">No cashback rules configured</p>
-            <p className="text-sm">Add your first cashback rule to get started</p>
+            <p className="text-sm">Create cashback rules for different recharge amount ranges</p>
+            <p className="text-xs mt-2 text-gray-400">
+              Example: ৳20-৳50 with 2% cashback, ৳100-৳250 with 7% cashback
+            </p>
           </div>
         )}
       </Card>
@@ -383,6 +382,15 @@ const RechargeCashback = () => {
         onClose={handleCloseModal}
         title={editingRule ? "Edit Cashback Rule" : "Add New Cashback Rule"}
       >
+        <div className="mb-4 p-3 bg-blue-50 rounded-md">
+          <p className="text-sm text-blue-700">
+            <strong>How it works:</strong> When a user recharges within this amount range, they will receive the specified percentage as cashback.
+          </p>
+          <p className="text-xs text-blue-600 mt-1">
+            Multiple ranges can overlap. For example: ৳20-৳50 (2%) and ৳30-৳60 (3%) are both valid.
+          </p>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -437,10 +445,6 @@ const RechargeCashback = () => {
               className="w-full"
             />
           </div>
-
-          {formErrors.range && (
-            <div className="text-red-600 text-sm">{formErrors.range}</div>
-          )}
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button
