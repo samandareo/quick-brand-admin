@@ -385,9 +385,9 @@ export const getAllRechargeOperators = (params, headers) =>
   httpRecharge.get("/api/recharge/operators", { params, headers });
 export const createRechargeOperator = (data, params, headers) =>
   httpRecharge.post("/api/recharge/operators", data, { params, headers });
-export const updateRechargeOperator = (data, params, headers) =>
-  httpRecharge.put("/api/recharge/operators", data, { params, headers });
-export const toggleRechargeOperatorStatus = (data, params, headers) =>
-  httpRecharge.patch("/api/recharge/operators", data, { params, headers });
-export const deleteRechargeOperator = (data, params, headers) =>
-  httpRecharge.delete("/api/recharge/operators", { data, params, headers });
+export const updateRechargeOperator = (id, data, params, headers) =>
+  httpRecharge.put(`/api/recharge/operators/${id}`, data, { params, headers });
+export const toggleRechargeOperatorStatus = (id, data, params, headers) =>
+  httpRecharge.patch(`/api/recharge/operators/${id}`, data, { params, headers });
+export const deleteRechargeOperator = (id, params, headers) =>
+  httpRecharge.delete(`/api/recharge/operators/${id}`, { params, headers });

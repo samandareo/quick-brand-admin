@@ -143,8 +143,7 @@ const RechargeOperators = () => {
       };
 
       if (editingOperator) {
-        data.id = editingOperator._id;
-        await updateRechargeOperator(data);
+        await updateRechargeOperator(editingOperator._id, data);
         setSuccess("Recharge operator updated successfully!");
       } else {
         await createRechargeOperator(data);
@@ -178,7 +177,7 @@ const RechargeOperators = () => {
       setError("");
       setSuccess("");
 
-      await toggleRechargeOperatorStatus({ id: operator._id });
+      await toggleRechargeOperatorStatus(operator._id, {});
       
       const newStatus = !operator.isActive;
       setSuccess(`Operator ${newStatus ? 'activated' : 'deactivated'} successfully!`);
@@ -204,7 +203,7 @@ const RechargeOperators = () => {
       setError("");
       setSuccess("");
 
-      await deleteRechargeOperator({ id: deletingOperator._id });
+      await deleteRechargeOperator(deletingOperator._id);
       setSuccess("Recharge operator deleted successfully!");
       setShowDeleteModal(false);
       setDeletingOperator(null);
