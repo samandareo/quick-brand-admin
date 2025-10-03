@@ -28,6 +28,7 @@ import ProductVariants from "./pages/ecommerce/ProductVariants";
 import Orders from "./pages/ecommerce/Orders";
 import RechargeLogs from "./pages/RechargeLogs";
 import RechargeCashback from "./pages/RechargeCashback";
+import RechargeOperators from "./pages/RechargeOperators";
 
 
 const App = () => {
@@ -69,6 +70,7 @@ const App = () => {
                 <Route path="push-notifications" element={<NotificationsPage />} />
                 <Route path="recharge-logs" element={<RechargeLogs />} />
                 <Route path="recharge-cashback" element={<RechargeCashback />} />
+                <Route path="recharge-operators" element={<RechargeOperators />} />
                 
                 {/* Ecommerce Routes */}
                 <Route path="ecommerce" element={<Ecommerce />} />

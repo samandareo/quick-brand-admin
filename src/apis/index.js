@@ -379,3 +379,15 @@ export const updateCashbackRule = (data, params, headers) =>
   httpRecharge.put("/api/cashback/", data, { params, headers });
 export const deleteCashbackRule = (data, params, headers) =>
   httpRecharge.delete("/api/cashback/", { data, params, headers });
+
+// Recharge Operators APIs
+export const getAllRechargeOperators = (params, headers) =>
+  httpRecharge.get("/api/recharge/operators", { params, headers });
+export const createRechargeOperator = (data, params, headers) =>
+  httpRecharge.post("/api/recharge/operators", data, { params, headers });
+export const updateRechargeOperator = (data, params, headers) =>
+  httpRecharge.put("/api/recharge/operators", data, { params, headers });
+export const toggleRechargeOperatorStatus = (data, params, headers) =>
+  httpRecharge.patch("/api/recharge/operators", data, { params, headers });
+export const deleteRechargeOperator = (data, params, headers) =>
+  httpRecharge.delete("/api/recharge/operators", { data, params, headers });

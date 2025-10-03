@@ -185,12 +185,20 @@ const RechargeLogs = () => {
             Monitor all recharge requests and their status
           </p>
         </div>
-        <Link to="/recharge-cashback">
-          <Button className="flex items-center space-x-2">
-            <CogIcon className="h-4 w-4" />
-            <span>Manage Cashback</span>
-          </Button>
-        </Link>
+        <div className="flex space-x-3">
+          <Link to="/recharge-operators">
+            <Button className="flex items-center space-x-2" variant="secondary">
+              <CogIcon className="h-4 w-4" />
+              <span>Manage Operators</span>
+            </Button>
+          </Link>
+          <Link to="/recharge-cashback">
+            <Button className="flex items-center space-x-2">
+              <CogIcon className="h-4 w-4" />
+              <span>Manage Cashback</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
