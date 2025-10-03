@@ -37,7 +37,8 @@ import {
   ClockIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
-  FunnelIcon
+  FunnelIcon,
+  BoltIcon
 } from "@heroicons/react/24/outline";
 
 export {
@@ -80,4 +81,5 @@ export {
   UserCircleIcon,
   MagnifyingGlassIcon as SearchIcon,
   FunnelIcon,
+  BoltIcon,
 };

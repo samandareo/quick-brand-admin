@@ -26,6 +26,7 @@ import Banners from "./pages/ecommerce/Banners";
 import Products from "./pages/ecommerce/Products";
 import ProductVariants from "./pages/ecommerce/ProductVariants";
 import Orders from "./pages/ecommerce/Orders";
+import RechargeLogs from "./pages/RechargeLogs";
 
 
 const App = () => {
@@ -65,6 +66,7 @@ const App = () => {
                 <Route path="manual-withdrawals" element={<ManualWithdrawalsPage />} />
                 <Route path="mobile-banking" element={<MobileBanking />} />
                 <Route path="push-notifications" element={<NotificationsPage />} />
+                <Route path="recharge-logs" element={<RechargeLogs />} />
                 
                 {/* Ecommerce Routes */}
                 <Route path="ecommerce" element={<Ecommerce />} />

@@ -356,3 +356,16 @@ export const getBestSellingProducts = (params, headers) =>
   httpEcommerce.get("/api/v1/products/mobile/top-selling", { params, headers });
 export const getDailySales = (params, headers) =>
   httpEcommerce.get("/api/v1/orders/admin/daily-sales", { params, headers });
+
+// Recharge APIs
+const httpRecharge = axios.create({
+  baseURL: "https://recharge.aspshopping.com",
+});
+
+httpRecharge.interceptors.request.use((config) => {
+  config.headers["Authorization"] = localStorage.getItem("authToken");
+  return config;
+});
+
+export const getAllRecharges = (params, headers) =>
+  httpRecharge.get("/api/recharge/all", { params, headers });

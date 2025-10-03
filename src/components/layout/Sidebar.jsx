@@ -13,6 +13,7 @@ import {
   ChatAltIcon,
   DocumentTextIcon,
   ShoppingCartIcon,
+  BoltIcon,
 } from "../icons";
 import { useAuth } from "../../context/AuthContext";
 import { ArrowLeftIcon } from "../icons";
@@ -42,6 +43,7 @@ const Sidebar = () => {
     { name: "Image Slider", href: "/sliders", icon: PhotographIcon },
     { name: "Live Chat", href: "/chat", icon: ChatAltIcon, unreadCount: getTotalUnreadCount() },
     { name: "Manual Withdrawals", href: "/manual-withdrawals", icon: DocumentTextIcon },
+    { name: "Recharge Logs", href: "/recharge-logs", icon: BoltIcon },
     { name: "Push Notifications", href: "/push-notifications", icon: BellIcon },
     { name: "Settings", href: "/settings", icon: CogIcon },
   ];
